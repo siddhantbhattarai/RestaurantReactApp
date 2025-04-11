@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build React app
+      - name: Build Next.js app
         run: |
           NODE_OPTIONS=--openssl-legacy-provider npm run build
 
@@ -37,15 +37,14 @@ jobs:
           fi
 
       - name: Upload to Windows VM
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.AZURE_VM_HOST }}
           username: ${{ secrets.AZURE_VM_USERNAME }}
           password: ${{ secrets.AZURE_VM_PASSWORD }}
           source: "app.zip"
           target: "C:/Users/${{ secrets.AZURE_VM_USERNAME }}/Desktop"
-          strip_components: 0
-          # tar_exec: ""  # disables tar usage to avoid 'tar not recognized' error on Windows
+          tar: false
 
       - name: SSH into Windows VM and deploy
         uses: appleboy/ssh-action@v1.0.0
