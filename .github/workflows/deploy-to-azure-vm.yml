@@ -45,7 +45,7 @@ jobs:
           source: "app.zip"
           target: "C:/Users/${{ secrets.AZURE_VM_USERNAME }}/Desktop"
           strip_components: 0
-          tar_exec: ""  # disables tar usage to avoid 'tar not recognized' error on Windows
+          # tar_exec: ""  # disables tar usage to avoid 'tar not recognized' error on Windows
 
       - name: SSH into Windows VM and deploy
         uses: appleboy/ssh-action@v1.0.0
