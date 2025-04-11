@@ -27,7 +27,7 @@ jobs:
       - name: Archive production build
         run: |
           mkdir deploy
-          cp -r .next public package.json package-lock.json deploy/
+          cp -r .next public src package.json package-lock.json deploy/
           cd deploy && zip -r ../app.zip . && cd ..
 
       - name: Upload to Windows VM
