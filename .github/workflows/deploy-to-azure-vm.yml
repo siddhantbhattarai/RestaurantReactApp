@@ -45,6 +45,7 @@ jobs:
           source: "app.zip"
           target: "C:/Users/${{ secrets.AZURE_VM_USERNAME }}/Desktop"
           rm: false
+          strip_components: 0
 
       - name: SSH into Windows VM and deploy
         uses: appleboy/ssh-action@v1.0.0
