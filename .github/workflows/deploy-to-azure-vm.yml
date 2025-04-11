@@ -3,7 +3,7 @@ name: Deploy to Azure Windows VM
 on:
   push:
     branches:
-      - dev
+      - main
 
 jobs:
   deploy:
