@@ -18,6 +18,9 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Fix OpenSSL issue
+        run: echo "NODE_OPTIONS=--openssl-legacy-provider" >> $GITHUB_ENV
+
       - name: Install dependencies
         run: npm install
 
