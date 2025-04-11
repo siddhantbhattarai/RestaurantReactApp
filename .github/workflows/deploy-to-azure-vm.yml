@@ -19,19 +19,20 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: NODE_OPTIONS=--openssl-legacy-provider npm install
+        run: npm install
 
       - name: Build Next.js app
-        run: NODE_OPTIONS=--openssl-legacy-provider npm run build
+        run: |
+          NODE_OPTIONS=--openssl-legacy-provider npm run build
 
       - name: Archive production build
         run: |
-          if [ -d ".next" ]; then
+          if [ -d "build" ]; then
             mkdir deploy
-            cp -r .next public src package.json package-lock.json deploy/
+            cp -r build public src package.json package-lock.json deploy/
             cd deploy && zip -r ../app.zip . && cd ..
           else
-            echo "Build failed: .next directory does not exist"
+            echo "Build failed: build directory does not exist"
             exit 1
           fi
 
