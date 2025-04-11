@@ -3,7 +3,7 @@ name: Deploy to Azure Windows VM
 on:
   push:
     branches:
-      - dev
+      - main
 
 jobs:
   deploy:
@@ -22,13 +22,19 @@ jobs:
         run: npm install
 
       - name: Build Next.js app
-        run: npm run build
+        run: |
+          NODE_OPTIONS=--openssl-legacy-provider npm run build
 
       - name: Archive production build
         run: |
-          mkdir deploy
-          cp -r .next public package.json package-lock.json deploy/
-          cd deploy && zip -r ../app.zip . && cd ..
+          if [ -d "build" ]; then
+            mkdir deploy
+            cp -r build public src package.json package-lock.json deploy/
+            cd deploy && zip -r ../app.zip . && cd ..
+          else
+            echo "Build failed: build directory does not exist"
+            exit 1
+          fi
 
       - name: Upload to Windows VM
         uses: appleboy/scp-action@v0.1.7
