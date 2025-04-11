@@ -1,0 +1,54 @@
+name: Deploy to Azure Windows VM
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Archive production build
+        run: |
+          mkdir deploy
+          cp -r .next public package.json package-lock.json deploy/
+          cd deploy && zip -r ../app.zip . && cd ..
+
+      - name: Upload to Windows VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.AZURE_VM_HOST }}
+          username: ${{ secrets.AZURE_VM_USERNAME }}
+          key: ${{ secrets.AZURE_VM_KEY }}
+          source: "app.zip"
+          target: "C:/Users/${{ secrets.AZURE_VM_USERNAME }}/Desktop"
+
+      - name: SSH into Windows VM and deploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AZURE_VM_HOST }}
+          username: ${{ secrets.AZURE_VM_USERNAME }}
+          key: ${{ secrets.AZURE_VM_KEY }}
+          script: |
+            powershell -Command "
+              Expand-Archive -Path 'C:\Users\${{ secrets.AZURE_VM_USERNAME }}\Desktop\app.zip' -DestinationPath 'C:\Deploy\App' -Force;
+              cd 'C:\Deploy\App';
+              npm install --production;
+              pm2 restart myapp || pm2 start npm --name myapp -- start;
+            "
