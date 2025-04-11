@@ -23,20 +23,15 @@ jobs:
 
       - name: Build React app
         run: |
-          NODE_OPTIONS=--openssl-legacy-provider npm run build
+          npm run build
 
       - name: Archive production build
         run: |
-          if [ -d "build" ]; then
-            mkdir deploy
-            cp -r build public src package.json package-lock.json deploy/
-            cd deploy && zip -r ../app.zip . && cd ..
-          else
-            echo "Build failed: build directory does not exist"
-            exit 1
-          fi
+          mkdir deploy
+          cp -r build package.json package-lock.json deploy/
+          cd deploy && zip -r ../app.zip . && cd ..
 
-      - name: Upload to Windows VM
+      - name: Upload .zip to Windows VM
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.AZURE_VM_HOST }}
