@@ -18,14 +18,11 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Fix OpenSSL issue
-        run: echo "NODE_OPTIONS=--openssl-legacy-provider" >> $GITHUB_ENV
-
       - name: Install dependencies
-        run: npm install
+        run: NODE_OPTIONS=--openssl-legacy-provider npm install
 
       - name: Build Next.js app
-        run: npm run build
+        run: NODE_OPTIONS=--openssl-legacy-provider npm run build
 
       - name: Archive production build
         run: |
