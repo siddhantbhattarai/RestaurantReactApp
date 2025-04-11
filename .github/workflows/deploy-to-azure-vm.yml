@@ -23,15 +23,20 @@ jobs:
 
       - name: Build React app
         run: |
-          npm run build
+          NODE_OPTIONS=--openssl-legacy-provider npm run build
 
       - name: Archive production build
         run: |
-          mkdir deploy
-          cp -r build package.json package-lock.json deploy/
-          cd deploy && zip -r ../app.zip . && cd ..
+          if [ -d "build" ]; then
+            mkdir deploy
+            cp -r build public src package.json package-lock.json deploy/
+            cd deploy && zip -r ../app.zip . && cd ..
+          else
+            echo "Build failed: build directory does not exist"
+            exit 1
+          fi
 
-      - name: Upload .zip to Windows VM
+      - name: Upload to Windows VM
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.AZURE_VM_HOST }}
@@ -39,6 +44,8 @@ jobs:
           password: ${{ secrets.AZURE_VM_PASSWORD }}
           source: "app.zip"
           target: "C:/Users/${{ secrets.AZURE_VM_USERNAME }}/Desktop"
+          strip_components: 0
+          tar_exec: ""  # disables tar usage to avoid 'tar not recognized' error on Windows
 
       - name: SSH into Windows VM and deploy
         uses: appleboy/ssh-action@v1.0.0
