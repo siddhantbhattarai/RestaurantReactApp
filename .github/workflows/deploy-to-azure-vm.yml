@@ -26,9 +26,14 @@ jobs:
 
       - name: Archive production build
         run: |
-          mkdir deploy
-          cp -r .next public src package.json package-lock.json deploy/
-          cd deploy && zip -r ../app.zip . && cd ..
+          if [ -d ".next" ]; then
+            mkdir deploy
+            cp -r .next public src package.json package-lock.json deploy/
+            cd deploy && zip -r ../app.zip . && cd ..
+          else
+            echo "Build failed: .next directory does not exist"
+            exit 1
+          fi
 
       - name: Upload to Windows VM
         uses: appleboy/scp-action@v0.1.7
