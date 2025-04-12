@@ -25,14 +25,14 @@ jobs:
         run: |
           NODE_OPTIONS=--openssl-legacy-provider npm run build
 
-      - name: Upload files to Windows VM (No zip/tar, wildcard for files)
+      - name: Upload build files to Windows VM
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.AZURE_VM_HOST }}
           username: ${{ secrets.AZURE_VM_USERNAME }}
           password: ${{ secrets.AZURE_VM_PASSWORD }}
-          source: "/*"  # Wildcard to upload all files in the repository
-          target: "C:/Users/${{ secrets.AZURE_VM_USERNAME }}/Desktop"
+          source: ".next public package.json package-lock.json"
+          target: "C:/Users/${{ secrets.AZURE_VM_USERNAME }}/Desktop/myapp"
           rm: false
           strip_components: 0
 
@@ -44,8 +44,7 @@ jobs:
           password: ${{ secrets.AZURE_VM_PASSWORD }}
           script: |
             powershell -Command "
-              # Navigate to the folder where files were uploaded
-              cd 'C:\Users\${{ secrets.AZURE_VM_USERNAME }}\Desktop';
+              cd 'C:\Users\${{ secrets.AZURE_VM_USERNAME }}\Desktop\myapp';
               npm install --production;
               pm2 restart myapp || pm2 start npm --name myapp -- start;
             "
