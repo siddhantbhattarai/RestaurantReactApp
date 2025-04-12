@@ -25,7 +25,14 @@ jobs:
         run: |
           NODE_OPTIONS=--openssl-legacy-provider npm run build
 
-      - name: Upload build files to Windows VM
+      - name: Check if .next exists
+        run: |
+          if [ ! -d ".next" ]; then
+            echo ".next directory not found. Build may have failed."
+            exit 1
+          fi
+
+      - name: Upload build files to Windows VM (no tar)
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.AZURE_VM_HOST }}
@@ -33,6 +40,7 @@ jobs:
           password: ${{ secrets.AZURE_VM_PASSWORD }}
           source: ".next public package.json package-lock.json"
           target: "C:/Users/${{ secrets.AZURE_VM_USERNAME }}/Desktop/myapp"
+          tar_exec: ""  # ⛔ disables tar compression to prevent issues on Windows
           rm: false
           strip_components: 0
 
