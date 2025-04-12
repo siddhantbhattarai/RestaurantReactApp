@@ -1,4 +1,4 @@
-name: Deploy to Azure Windows VM
+name: Deploy CRA App to Azure Windows VM
 
 on:
   push:
@@ -21,14 +21,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build Next.js app
+      - name: Build React app
         run: |
           NODE_OPTIONS=--openssl-legacy-provider npm run build
+          echo "✅ Build complete."
 
-      - name: Check if .next exists
+      - name: Check if build directory exists
         run: |
-          if [ ! -d ".next" ]; then
-            echo ".next directory not found. Build may have failed."
+          if [ ! -d "build" ]; then
+            echo "❌ Build folder not found. Something went wrong during build."
             exit 1
           fi
 
@@ -38,13 +39,13 @@ jobs:
           host: ${{ secrets.AZURE_VM_HOST }}
           username: ${{ secrets.AZURE_VM_USERNAME }}
           password: ${{ secrets.AZURE_VM_PASSWORD }}
-          source: ".next public package.json package-lock.json"
+          source: "build package.json package-lock.json"
           target: "C:/Users/${{ secrets.AZURE_VM_USERNAME }}/Desktop/myapp"
-          tar_exec: ""  # ⛔ disables tar compression to prevent issues on Windows
+          tar_exec: ""  # Disable tar to fix Windows compatibility
           rm: false
           strip_components: 0
 
-      - name: SSH into Windows VM and deploy
+      - name: SSH into Windows VM and serve app
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.AZURE_VM_HOST }}
@@ -54,5 +55,6 @@ jobs:
             powershell -Command "
               cd 'C:\Users\${{ secrets.AZURE_VM_USERNAME }}\Desktop\myapp';
               npm install --production;
-              pm2 restart myapp || pm2 start npm --name myapp -- start;
+              npm install -g serve;
+              pm2 restart cra-app || pm2 start serve --name cra-app -- -s build -l 3000;
             "
