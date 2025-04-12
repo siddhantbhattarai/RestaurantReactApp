@@ -32,7 +32,7 @@ jobs:
         run: |
           sshpass -p "${{ secrets.AZURE_VM_PASSWORD }}" scp -o StrictHostKeyChecking=no -r ./build ./package.json ./package-lock.json ${{ secrets.AZURE_VM_USERNAME }}@${{ secrets.AZURE_VM_HOST }}:"C:/Users/${{ secrets.AZURE_VM_USERNAME }}/Desktop/myapp"
 
-      - name: SSH into Windows VM and serve app
+      - name: SSH into Windows VM and deploy app
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.AZURE_VM_HOST }}
@@ -41,7 +41,8 @@ jobs:
           script: |
             powershell -Command "
               cd 'C:\Users\${{ secrets.AZURE_VM_USERNAME }}\Desktop\myapp';
-              npm install --production;
+              npm install;
               npm install -g serve;
-              pm2 restart cra-app || pm2 start serve --name cra-app -- -s build -l 3000;
+              npm install -g pm2;
+              pm2 restart cra-app || pm2 start npm --name 'cra-app' -- start;
             "
